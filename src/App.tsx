@@ -12,6 +12,7 @@ import Karur from "./pages/karur/Index";
 import Salem from "./pages/salem/Index";
 import Namakkal from "./pages/namakkal/Index";
 import Dindigul from "./pages/dindigul/Index";
+import CandidatesList from "./pages/CandidatesList";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -33,6 +34,7 @@ const App = () => (
               <Route path="/salem" element={<Salem />} />
               <Route path="/namakkal" element={<Namakkal />} />
               <Route path="/dindigul" element={<Dindigul />} />
+              <Route path="/candidates-2026" element={<CandidatesList />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </main>
