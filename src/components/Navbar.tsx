@@ -31,6 +31,17 @@ const Navbar = () => {
               {d.label}
             </Link>
           ))}
+          {/* Candidates List 2026 Link */}
+          <Link
+            to="/candidates-2026"
+            className={`whitespace-nowrap rounded-full px-4 py-2 text-sm font-medium transition-colors ${
+              pathname === "/candidates-2026"
+                ? "bg-yellow-400 text-yellow-900 shadow"
+                : "text-foreground hover:bg-muted"
+            }`}
+          >
+            வேட்பாளர் பட்டியல் 2026
+          </Link>
         </div>
 
       </div>
