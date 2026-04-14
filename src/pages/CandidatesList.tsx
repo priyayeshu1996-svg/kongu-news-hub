@@ -102,6 +102,38 @@ const partyColors: Record<string, string> = {
   "கொங்கு வளர்ச்சி இயக்கம்": "bg-indigo-100 text-indigo-800",
 };
 
+interface NewsItem {
+  id: number;
+  title: string;
+  description: string;
+  image: string;
+  date: string;
+}
+
+const featuredNews: NewsItem[] = [
+  {
+    id: 1,
+    title: "2026 தேர்தல் அறிவிப்பு",
+    description: "கொங்கு மண்டலத்தில் 7 மாவட்டங்களில் தேர்தல் அறிவிக்கப்பட்டுள்ளது",
+    image: "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?w=500&h=300&fit=crop",
+    date: "12 ஏப்ரல் 2026"
+  },
+  {
+    id: 2,
+    title: "வேட்பாளர் பட்டியல் வெளியீடு",
+    description: "பல்வேறு கட்சிகளிலிருந்து 2026 வேட்பாளர்கள் பதிவு செய்யப்பட்டுள்ளனர்",
+    image: "https://images.unsplash.com/photo-1552664730-d307ca884978?w=500&h=300&fit=crop",
+    date: "10 ஏப்ரல் 2026"
+  },
+  {
+    id: 3,
+    title: "அभियான் தொடக்கம்",
+    description: "வேட்பாளர்கள் தங்கள் அभियான் நடவடிக்கையை தொடங்கியுள்ளனர்",
+    image: "https://images.unsplash.com/photo-1517457373614-b7152f800fd1?w=500&h=300&fit=crop",
+    date: "9 ஏப்ரல் 2026"
+  },
+];
+
 const CandidatesList = () => {
   const [searchParams] = useSearchParams();
   const districtQuery = searchParams.get("district")?.trim().toLowerCase();
@@ -127,6 +159,44 @@ const CandidatesList = () => {
             வேட்பாளர் பட்டியல் 2026
           </h1>
           <p className="text-lg text-muted-foreground">{displayTitle}</p>
+        </div>
+
+        {/* Featured News Section */}
+        <div className="mb-12 py-8 border-t border-b border-border">
+          <h2 className="text-2xl font-bold text-foreground mb-6">
+            தேர்தல் செய்திகள்
+          </h2>
+          <motion.div layout className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {featuredNews.map((news, index) => (
+              <motion.div
+                key={news.id}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: index * 0.1 }}
+              >
+                <Card className="overflow-hidden hover:shadow-lg transition-shadow h-full">
+                  <div className="aspect-video overflow-hidden bg-muted">
+                    <img
+                      src={news.image}
+                      alt={news.title}
+                      className="w-full h-full object-cover hover:scale-105 transition-transform"
+                    />
+                  </div>
+                  <CardContent className="pt-4">
+                    <h3 className="font-bold text-foreground mb-2 line-clamp-2">
+                      {news.title}
+                    </h3>
+                    <p className="text-sm text-muted-foreground mb-4 line-clamp-2">
+                      {news.description}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      📅 {news.date}
+                    </p>
+                  </CardContent>
+                </Card>
+              </motion.div>
+            ))}
+          </motion.div>
         </div>
 
         {/* Candidates Display Section (No Filter Buttons) */}
