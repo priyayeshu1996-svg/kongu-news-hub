@@ -1,5 +1,5 @@
+import { useState } from "react";
 import { motion } from "framer-motion";
-import { useSearchParams } from "react-router-dom";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 
@@ -102,13 +102,35 @@ const partyColors: Record<string, string> = {
 };
 
 const CandidatesList = () => {
-  const [searchParams] = useSearchParams();
-  const districtQuery = searchParams.get("district")?.trim().toLowerCase();
-  const districtName = districtQuery ? districtNames[districtQuery] : undefined;
-  const filteredCandidates = districtName
-    ? candidates2026.filter((candidate) => candidate.district === districtName)
+  const [activeTab, setActiveTab] = useState<"all" | "district">("all");
+  const [selectedDistrict, setSelectedDistrict] = useState<string | null>(null);
+
+  const districtsArray = [
+    { query: "coimbatore", label: "கோயம்புத்தூர்" },
+    { query: "erode", label: "ஈரோடு" },
+    { query: "tiruppur", label: "திருப்பூர்" },
+    { query: "karur", label: "கரூர்" },
+    { query: "salem", label: "சேலம்" },
+    { query: "namakkal", label: "நாமக்கல்" },
+    { query: "dindigul", label: "திண்டுக்கல்" },
+  ];
+
+  const getDistrictName = (query: string) => districtNames[query] || null;
+
+  const handleDistrictClick = (query: string) => {
+    const districtName = getDistrictName(query);
+    setSelectedDistrict(districtName);
+    setActiveTab("district");
+  };
+
+  const filteredCandidates = selectedDistrict
+    ? candidates2026.filter((candidate) => candidate.district === selectedDistrict)
     : candidates2026;
-  const selectedDistrict = districtName ?? null;
+
+  const displayTitle =
+    activeTab === "district" && selectedDistrict
+      ? `${selectedDistrict} மாவட்டத்தின் 2026 வேட்பாளர்கள்`
+      : "அனைத்து வேட்பாளர்களும்";
 
   return (
     <div className="min-h-screen bg-background">
@@ -117,20 +139,108 @@ const CandidatesList = () => {
         animate={{ opacity: 1, y: 0 }}
         className="container mx-auto px-4 py-8"
       >
-        {/* Header Section */}
-        <div className="mb-12">
+        {/* Header */}
+        <div className="mb-8">
           <h1 className="text-4xl font-bold text-foreground mb-2">
             வேட்பாளர் பட்டியல் 2026
           </h1>
-          <p className="text-lg text-muted-foreground">
-            {selectedDistrict
-              ? `${selectedDistrict} மாவட்டத்தின் 2026 வேட்பாளர்கள்`
-              : "கொங்கு மண்டலத்தின் உயர்தர அரசியல் வேட்பாளர்கள் பத்திகள்"}
-          </p>
         </div>
 
-        {/* Statistics */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-12">
+        {/* Single Unified Filter + Tab Section */}
+        <Card className="mb-8 bg-card border border-border">
+          <CardHeader className="pb-4">
+            <CardTitle className="text-lg mb-4">{displayTitle}</CardTitle>
+
+            {/* District Filter Buttons */}
+            <div className="flex gap-2 flex-wrap">
+              <button
+                onClick={() => {
+                  setSelectedDistrict(null);
+                  setActiveTab("all");
+                }}
+                className={`rounded-full px-4 py-2 text-sm font-medium transition-colors whitespace-nowrap ${
+                  activeTab === "all"
+                    ? "bg-primary text-primary-foreground shadow"
+                    : "border border-border bg-muted text-foreground hover:border-primary"
+                }`}
+              >
+                அனைத்து வேட்பாளர்கள்
+              </button>
+
+              {districtsArray.map((district) => (
+                <button
+                  key={district.query}
+                  onClick={() => handleDistrictClick(district.query)}
+                  className={`rounded-full px-4 py-2 text-sm font-medium transition-colors whitespace-nowrap ${
+                    activeTab === "district" && selectedDistrict === getDistrictName(district.query)
+                      ? "bg-primary text-primary-foreground shadow"
+                      : "border border-border bg-muted text-foreground hover:border-primary"
+                  }`}
+                >
+                  {district.label}
+                </button>
+              ))}
+            </div>
+          </CardHeader>
+
+          {/* Candidates Content */}
+          <CardContent className="pt-6">
+            {filteredCandidates.length === 0 ? (
+              <div className="rounded-lg border border-border bg-muted/50 p-8 text-center">
+                <p className="text-sm text-muted-foreground">
+                  இந்த மாவட்டத்திற்கு வேட்பாளர்கள் இல்லை.
+                </p>
+              </div>
+            ) : (
+              <motion.div layout className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {filteredCandidates.map((candidate, index) => (
+                  <motion.div
+                    key={candidate.id}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.05 }}
+                  >
+                    <Card className="h-full hover:shadow-lg transition-shadow">
+                      <CardHeader>
+                        <div className="flex items-start justify-between gap-4">
+                          <div className="flex-1">
+                            <CardTitle className="text-base break-words">
+                              {candidate.name}
+                            </CardTitle>
+                            <CardDescription className="mt-1 text-xs">
+                              {candidate.position}
+                            </CardDescription>
+                          </div>
+                          <Badge className="whitespace-nowrap text-xs" variant="secondary">
+                            {candidate.district}
+                          </Badge>
+                        </div>
+                      </CardHeader>
+                      <CardContent className="space-y-3">
+                        <div>
+                          <div
+                            className={`inline-block px-3 py-1 rounded-full text-xs font-medium ${
+                              partyColors[candidate.party] || "bg-gray-100 text-gray-800"
+                            }`}
+                          >
+                            {candidate.party}
+                          </div>
+                        </div>
+                        <div>
+                          <p className="text-xs text-muted-foreground mb-1">அனுபவம்</p>
+                          <p className="text-sm font-medium">{candidate.experience}</p>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  </motion.div>
+                ))}
+              </motion.div>
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Statistics Section */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <Card>
             <CardHeader className="pb-3">
               <CardTitle className="text-sm font-medium text-muted-foreground">
@@ -149,7 +259,7 @@ const CandidatesList = () => {
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold">
-                {new Set(candidates2026.map(c => c.party)).size}
+                {new Set(candidates2026.map((c) => c.party)).size}
               </div>
             </CardContent>
           </Card>
@@ -161,68 +271,16 @@ const CandidatesList = () => {
             </CardHeader>
             <CardContent>
               <div className="text-3xl font-bold">
-                {new Set(candidates2026.map(c => c.district)).size}
+                {new Set(candidates2026.map((c) => c.district)).size}
               </div>
             </CardContent>
           </Card>
         </div>
 
-        {/* Candidates Grid */}
-        {filteredCandidates.length === 0 ? (
-          <div className="rounded-xl border border-border bg-muted p-8 text-center text-foreground">
-            <p className="text-lg font-semibold">இந்த மாவட்டத்திற்கு வேட்பாளர்கள் இல்லை.</p>
-            <p className="text-sm text-muted-foreground">முற்றிலும் பட்டியலை பார்க்க <span className="font-medium">அனைத்து வேட்பாளர்கள்</span> கிளிக் செய்யவும்.</p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {filteredCandidates.map((candidate, index) => (
-            <motion.div
-              key={candidate.id}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.1 }}
-            >
-              <Card className="h-full hover:shadow-lg transition-shadow">
-                <CardHeader>
-                  <div className="flex items-start justify-between gap-4">
-                    <div className="flex-1">
-                      <CardTitle className="text-lg break-words">
-                        {candidate.name}
-                      </CardTitle>
-                      <CardDescription className="mt-1">
-                        {candidate.position}
-                      </CardDescription>
-                    </div>
-                    <Badge className="whitespace-nowrap" variant="secondary">
-                      {candidate.district}
-                    </Badge>
-                  </div>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div>
-                    <div className={`inline-block px-3 py-1 rounded-full text-sm font-medium ${
-                      partyColors[candidate.party] || "bg-gray-100 text-gray-800"
-                    }`}>
-                      {candidate.party}
-                    </div>
-                  </div>
-                  <div>
-                    <p className="text-sm text-muted-foreground mb-1">
-                      அனுபவம்
-                    </p>
-                    <p className="text-sm font-medium">{candidate.experience}</p>
-                  </div>
-                </CardContent>
-              </Card>
-            </motion.div>
-            ))}
-          </div>
-        )}
-
         {/* Footer Note */}
-        <div className="mt-12 p-6 bg-muted rounded-lg text-center">
+        <div className="mt-8 p-6 bg-muted rounded-lg text-center">
           <p className="text-sm text-muted-foreground">
-            இந்தத் தகவல் 2026-ம் ஆண்டிற்கான அனுமानित வேட்பாளர் விவரங்கள். 
+            இந்தத் தகவல் 2026-ம் ஆண்டிற்கான அனுமानित வேட்பாளர் விவரங்கள்.
             <br />
             அதிகாரப்பூர்வ பட்டியலுக்கு தேர்தல் ஆணையம் வலைத்தளம் பார்க்கவும்.
           </p>
