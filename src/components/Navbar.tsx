@@ -50,13 +50,9 @@ const Navbar = () => {
           {candidateDistricts.map((d) => (
             <Link
               key={d.query}
-              to="/candidates-2026"
-              onClick={() => {
-                // Scroll to top on click
-                window.scrollTo({ top: 0, behavior: "smooth" });
-              }}
+              to={`/candidates-2026?district=${d.query}`}
               className={`whitespace-nowrap rounded-full px-4 py-2 text-sm font-medium transition-colors ${
-                pathname === "/candidates-2026"
+                pathname === "/candidates-2026" && window.location.search.includes(`district=${d.query}`)
                   ? "bg-primary text-primary-foreground shadow"
                   : "text-foreground hover:bg-muted"
               }`}
@@ -66,11 +62,8 @@ const Navbar = () => {
           ))}
           <Link
             to="/candidates-2026"
-            onClick={() => {
-              window.scrollTo({ top: 0, behavior: "smooth" });
-            }}
             className={`whitespace-nowrap rounded-full px-4 py-2 text-sm font-medium transition-colors ${
-              pathname === "/candidates-2026"
+              pathname === "/candidates-2026" && !window.location.search
                 ? "bg-primary text-primary-foreground shadow"
                 : "text-foreground hover:bg-muted"
             }`}

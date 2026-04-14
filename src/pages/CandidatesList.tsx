@@ -1,4 +1,5 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useSearchParams } from "react-router-dom";
 import { motion } from "framer-motion";
 import { Badge } from "@/components/ui/badge";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -102,35 +103,16 @@ const partyColors: Record<string, string> = {
 };
 
 const CandidatesList = () => {
-  const [activeTab, setActiveTab] = useState<"all" | "district">("all");
-  const [selectedDistrict, setSelectedDistrict] = useState<string | null>(null);
-
-  const districtsArray = [
-    { query: "coimbatore", label: "கோயம்புத்தூர்" },
-    { query: "erode", label: "ஈரோடு" },
-    { query: "tiruppur", label: "திருப்பூர்" },
-    { query: "karur", label: "கரூர்" },
-    { query: "salem", label: "சேலம்" },
-    { query: "namakkal", label: "நாமக்கல்" },
-    { query: "dindigul", label: "திண்டுக்கல்" },
-  ];
-
-  const getDistrictName = (query: string) => districtNames[query] || null;
-
-  const handleDistrictClick = (query: string) => {
-    const districtName = getDistrictName(query);
-    setSelectedDistrict(districtName);
-    setActiveTab("district");
-  };
-
-  const filteredCandidates = selectedDistrict
-    ? candidates2026.filter((candidate) => candidate.district === selectedDistrict)
+  const [searchParams] = useSearchParams();
+  const districtQuery = searchParams.get("district")?.trim().toLowerCase();
+  const districtName = districtQuery ? districtNames[districtQuery] : undefined;
+  const filteredCandidates = districtName
+    ? candidates2026.filter((candidate) => candidate.district === districtName)
     : candidates2026;
 
-  const displayTitle =
-    activeTab === "district" && selectedDistrict
-      ? `${selectedDistrict} மாவட்டத்தின் 2026 வேட்பாளர்கள்`
-      : "அனைத்து வேட்பாளர்களும்";
+  const displayTitle = districtName
+    ? `${districtName} மாவட்டத்தின் 2026 வேட்பாளர்கள்`
+    : "அனைத்து வேட்பாளர்களும்";
 
   return (
     <div className="min-h-screen bg-background">
@@ -144,46 +126,11 @@ const CandidatesList = () => {
           <h1 className="text-4xl font-bold text-foreground mb-2">
             வேட்பாளர் பட்டியல் 2026
           </h1>
+          <p className="text-lg text-muted-foreground">{displayTitle}</p>
         </div>
 
-        {/* Single Unified Filter + Tab Section */}
+        {/* Candidates Display Section (No Filter Buttons) */}
         <Card className="mb-8 bg-card border border-border">
-          <CardHeader className="pb-4">
-            <CardTitle className="text-lg mb-4">{displayTitle}</CardTitle>
-
-            {/* District Filter Buttons */}
-            <div className="flex gap-2 flex-wrap">
-              <button
-                onClick={() => {
-                  setSelectedDistrict(null);
-                  setActiveTab("all");
-                }}
-                className={`rounded-full px-4 py-2 text-sm font-medium transition-colors whitespace-nowrap ${
-                  activeTab === "all"
-                    ? "bg-primary text-primary-foreground shadow"
-                    : "border border-border bg-muted text-foreground hover:border-primary"
-                }`}
-              >
-                அனைத்து வேட்பாளர்கள்
-              </button>
-
-              {districtsArray.map((district) => (
-                <button
-                  key={district.query}
-                  onClick={() => handleDistrictClick(district.query)}
-                  className={`rounded-full px-4 py-2 text-sm font-medium transition-colors whitespace-nowrap ${
-                    activeTab === "district" && selectedDistrict === getDistrictName(district.query)
-                      ? "bg-primary text-primary-foreground shadow"
-                      : "border border-border bg-muted text-foreground hover:border-primary"
-                  }`}
-                >
-                  {district.label}
-                </button>
-              ))}
-            </div>
-          </CardHeader>
-
-          {/* Candidates Content */}
           <CardContent className="pt-6">
             {filteredCandidates.length === 0 ? (
               <div className="rounded-lg border border-border bg-muted/50 p-8 text-center">
